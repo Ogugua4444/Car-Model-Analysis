@@ -1,0 +1,94 @@
+# Creating the dataset in R
+data1 <- data.frame(
+  ID = c("CAR00005", "CAR00005", "CAR00024", "CAR00024", "CAR00028", "CAR00028",
+         "CAR00142", "CAR00142", "CAR00143", "CAR00143", "CAR00160", "CAR00160",
+         "CAR00001", "CAR00002", "CAR00003", "CAR00004", "CAR00006", "CAR00007",
+         "CAR00008", "CAR00009", "CAR00010", "CAR00011", "CAR00012", "CAR00013",
+         "CAR00014", "CAR00015"),
+  Date = c("19/06/2022", "19/06/2022", "22/10/2023", "22/10/2023", "1/10/2023", "1/10/2023",
+           "15/10/2023", "15/10/2023", "29/10/2023", "29/10/2023", "22/01/2023", "22/01/2023",
+           "3/12/2022", "2/12/2023", "25/03/2023", "18/06/2022", "25/11/2023", "30/04/2022",
+           "3/12/2022", "19/11/2022", "11/6/2022", "6/5/2023", "25/11/2023", "9/9/2023",
+           "10/9/2022", "14/05/2022"),
+  Car_Model = c("Model C", "Model C", "Model C", "Model C", "Model D", "Model D",
+                "Model C", "Model C", "Model B", "Model B", "Model C", "Model C",
+                "Model B", "Model A", "Model D", "Model C", "Model B", "Model D",
+                "Model B", "Model C", "Model B", "Model A", "Model D", "Model E",
+                "Model B", "Model A"),
+  Production_Units = c(364, 364, 116, 116, NA, NA, 123, 123, 179, 179, 273, 273,
+                       210, 311, 334, 364, 237, 298, 214, 181, 207, 301, 172, NA,
+                       434, 145),
+  Sales_Units = c(91, 91, 153, 153, 306, 306, 327, 327, 264, 264, 204, 204,
+                  207, 156, 276, 91, 147, 357, 262, 358, 220, 303, 75, 146,
+                  166, 183)
+)
+
+
+data1$Production_Units[is.na(data1$Production_Units)] <- mean(data1$Production_Units, na.rm = TRUE)
+data1$Sales_Units[is.na(data1$Sales_Units)] <- mean(data1$Sales_Units, na.rm = TRUE)
+
+
+# Convert the Date column to Date format
+data1$Date <- as.Date(data1$Date, format = "%d/%m/%Y")
+
+# Extract Month and Year
+data1$Month <- format(data1$Date, "%m")
+data1$Year <- format(data1$Date, "%Y")
+
+# Display the updated dataset
+print(data1)
+
+
+# Summary statistics
+summary(data1$Production_Units)
+summary(data1$Sales_Units)
+
+
+# Total production and sales by Car Model
+library(dplyr)
+
+# Grouped by Car Model
+grouped_data1 <- data1 %>%
+  group_by(Car_Model) %>%
+  summarise(
+    Total_Production = sum(Production_Units, na.rm = TRUE),
+    Total_Sales = sum(Sales_Units, na.rm = TRUE)
+  )
+
+print(grouped_data1)
+
+
+
+# Total production and sales by Year-Month
+data1$YearMonth <- format(data1$Date, "%Y-%m")
+
+trend_data1 <- data1 %>%
+  group_by(YearMonth) %>%
+  summarise(
+    Monthly_Production = sum(Production_Units, na.rm = TRUE),
+    Monthly_Sales = sum(Sales_Units, na.rm = TRUE)
+  )
+
+print(trend_data1)
+
+
+
+library(ggplot2)
+
+# Bar plot of total sales by Car Model
+ggplot(data1, aes(x = Car_Model, y = Sales_Units, fill = Car_Model)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Total Sales by Car Model", x = "Car Model", y = "Sales Units") +
+  theme_minimal()
+
+
+# Line plot of total sales by Year
+ggplot(data1, aes(x = Year, y = Production_Units, group = 1)) +
+  geom_line() +
+  labs(title = "Production Units Over Time", x = "Year", y = "Production Units") +
+  theme_minimal()
+
+
+
+
+
